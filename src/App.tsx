@@ -160,6 +160,8 @@ function App() {
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
       if (!activePiece || !pieceRefs.current[activePiece]) return;
+      // Prevent scrolling while rotating
+      e.preventDefault();
       const pieceElement = pieceRefs.current[activePiece];
       const rect = pieceElement!.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -261,8 +263,6 @@ function App() {
                 }}
                 onMouseDown={(e) => handleMouseDown(e, piece.id)}
                 onTouchStart={(e) => handleTouchStart(e, piece.id)}
-                // Prevent scrolling while rotating
-                onTouchMove={(e) => e.preventDefault()}
               />
             ))}
           </div>
