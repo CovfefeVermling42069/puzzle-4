@@ -36,3 +36,17 @@
     transform: rotate(360deg);
   }
 }
+
+/* Import gothic fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&display=swap');
+
+/* Gothic header style */
+.gothic-header {
+  font-family: 'Pirata One', 'UnifrakturMaguntia', serif;
+  font-size: 5rem;
+  color: #b8b8b8;
+  text-shadow: 2px 2px 4px #000000;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+}
