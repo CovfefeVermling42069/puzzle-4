@@ -140,18 +140,79 @@ function App() {
     setActivePiece(null);
   }, []);
 
+  // Handle touch start to start rotation on mobile
+  const handleTouchStart = (
+    e: React.TouchEvent<HTMLImageElement>,
+    pieceId: string
+  ) => {
+    setActivePiece(pieceId);
+    let clientX = 0;
+    let clientY = 0;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+    startPointRef.current = { x: clientX, y: clientY };
+    startRotationRef.current = rotations[pieceId];
+  };
+
+  // Handle touch move for rotation on mobile
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!activePiece || !pieceRefs.current[activePiece]) return;
+      const pieceElement = pieceRefs.current[activePiece];
+      const rect = pieceElement!.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      if (e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const startAngle = Math.atan2(
+        startPointRef.current.y - centerY,
+        startPointRef.current.x - centerX
+      );
+      const currentAngle = Math.atan2(
+        touch.clientY - centerY,
+        touch.clientX - centerX
+      );
+      let newRotation =
+        startRotationRef.current +
+        ((currentAngle - startAngle) * 180) / Math.PI;
+      setRotations((prev) => ({
+        ...prev,
+        [activePiece]: newRotation,
+      }));
+    },
+    [activePiece]
+  );
+
+  // Handle touch end to stop rotation on mobile
+  const handleTouchEnd = useCallback(() => {
+    setActivePiece(null);
+  }, []);
+
   // Add event listeners to document
   React.useEffect(() => {
     if (activePiece) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+      document.addEventListener("touchend", handleTouchEnd);
     }
-
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [activePiece, handleMouseMove, handleMouseUp]);
+  }, [
+    activePiece,
+    handleMouseMove,
+    handleMouseUp,
+    handleTouchMove,
+    handleTouchEnd,
+  ]);
 
   return (
     <div className="App">
@@ -199,6 +260,9 @@ function App() {
                   transformOrigin: "center center",
                 }}
                 onMouseDown={(e) => handleMouseDown(e, piece.id)}
+                onTouchStart={(e) => handleTouchStart(e, piece.id)}
+                // Prevent scrolling while rotating
+                onTouchMove={(e) => e.preventDefault()}
               />
             ))}
           </div>
